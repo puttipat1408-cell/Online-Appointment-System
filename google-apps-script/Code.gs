@@ -389,3 +389,47 @@ function jsonResponse(value) {
     .createTextOutput(JSON.stringify(value))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+// -------------------------------------------------------------
+// ทำงานอัตโนมัติเมื่อเปิดชีต หรือมีคนแก้ไขข้อมูลในชีต
+// -------------------------------------------------------------
+
+// เมนูลัดบนแถบเมนู Google Sheet ให้กดอัปเดตเองได้ทันทีโดยไม่ต้องเปิดโปรแกรม
+function onOpen() {
+  try {
+    SpreadsheetApp.getUi()
+      .createMenu("⚡ ระบบนัดหมาย")
+      .addItem("🔄 อัปเดตสรุปรายเดือนทั้งหมดทันที", "menuRebuildSummaries")
+      .addToUi();
+  } catch (e) {
+    // กรณีรันผ่าน Webhook จะไม่มี UI ข้ามไปได้
+  }
+}
+
+function menuRebuildSummaries() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const dailySheet = getOrCreateDailySheet(spreadsheet);
+  rebuildAllMonthlySummaries(spreadsheet, dailySheet);
+  spreadsheet.toast("อัปเดตแท็บสรุปรายเดือนทุกเดือนเรียบร้อยแล้ว!", "สำเร็จ", 5);
+}
+
+// อัปเดตสรุปรายเดือนอัตโนมัติทันทีที่มีการแก้ไขในแท็บ "รายการจองรายวัน"
+function onEdit(e) {
+  try {
+    const range = e && e.range;
+    if (!range) return;
+    const sheet = range.getSheet();
+    if (sheet.getName() !== DAILY_SHEET_NAME) return;
+
+    const row = range.getRow();
+    if (row <= 1) return;
+
+    const spreadsheet = sheet.getParent();
+    const dateVal = sheet.getRange(row, 3).getValue();
+    if (dateVal) {
+      updateMonthlySummary(spreadsheet, sheet, dateVal);
+    }
+  } catch (err) {
+    console.error("onEdit error:", err);
+  }
+}
