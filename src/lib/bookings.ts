@@ -8,10 +8,26 @@ import { syncBookingReportRow } from "@/lib/google-sheets";
 import { sendTelegramBookingNotification } from "@/lib/telegram";
 import { BOOKING_TIME_SLOTS, BOOKING_TOPIC_GROUPS, getBookingTopic } from "@/lib/booking-options";
 import type { CreateBookingInput } from "@/lib/types";
-import { AppError, formatBangkokDay } from "@/lib/utils";
+import { AppError, formatBangkokDay, getBangkokDateParts } from "@/lib/utils";
 
 const TICKET_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const SLOT_TAKEN_MESSAGE = "ขออภัย ช่วงเวลานี้ของกลุ่มงานดังกล่าวมีผู้จองแล้ว กรุณาเลือกช่วงเวลาอื่น";
+
+export function isTimeSlotPassedToday(dateStr: string, slotId: string, now: Date = new Date()): boolean {
+  const today = formatBangkokDay(now);
+  if (dateStr < today) return true;
+  if (dateStr > today) return false;
+
+  const startTimePart = slotId.split("-")[0];
+  const [slotHour, slotMin] = startTimePart.split(".").map((num) => parseInt(num, 10));
+  if (isNaN(slotHour) || isNaN(slotMin)) return false;
+
+  const { hour, minute } = getBangkokDateParts(now);
+  const currentMinutes = parseInt(hour, 10) * 60 + parseInt(minute, 10);
+  const slotMinutes = slotHour * 60 + slotMin;
+
+  return slotMinutes <= currentMinutes;
+}
 
 function validateBookingDate(date: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -57,10 +73,19 @@ export async function getAvailableBookingSlots(date: string, topicId: string) {
   }
 
   const bookedSlots = new Set((data ?? []).map((row) => row.time_slot));
-  return BOOKING_TIME_SLOTS.map((slot) => ({
-    ...slot,
-    available: !bookedSlots.has(slot.id),
-  }));
+  const now = new Date();
+
+  return BOOKING_TIME_SLOTS.map((slot) => {
+    const isPast = isTimeSlotPassedToday(date, slot.id, now);
+    const isBooked = bookedSlots.has(slot.id);
+    const available = !isBooked && !isPast;
+
+    return {
+      ...slot,
+      available,
+      reason: isPast ? ("past" as const) : isBooked ? ("booked" as const) : ("available" as const),
+    };
+  });
 }
 
 export async function createBooking(input: CreateBookingInput, appOrigin: string) {
@@ -88,7 +113,11 @@ export async function createBooking(input: CreateBookingInput, appOrigin: string
 
   const topicText = topic.allowsOther ? `${topic.label} (${topicOther})` : topic.label;
   const availableSlots = await getAvailableBookingSlots(input.date, input.topicId);
-  if (!availableSlots.find((slot) => slot.id === input.timeSlot)?.available) {
+  const targetSlot = availableSlots.find((slot) => slot.id === input.timeSlot);
+  if (!targetSlot?.available) {
+    if (targetSlot?.reason === "past" || isTimeSlotPassedToday(input.date, input.timeSlot)) {
+      throw new AppError("ช่วงเวลานี้ผ่านไปแล้วในวันนี้ ไม่สามารถจองได้", 400);
+    }
     throw new AppError(SLOT_TAKEN_MESSAGE, 409);
   }
 

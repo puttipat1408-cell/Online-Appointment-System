@@ -18,6 +18,7 @@ type BookingSlot = {
   id: string;
   label: string;
   available: boolean;
+  reason?: "past" | "booked" | "available";
 };
 
 type BookingStatus = {
@@ -621,7 +622,11 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
                           >
                             <span>{slot.label}</span>
                             <span className={`slot-availability ${slot.available ? "" : "is-full"}`}>
-                              {slot.available ? "✨ ว่าง" : "🔒 กลุ่มนี้จองแล้ว"}
+                              {slot.available
+                                ? "✨ ว่าง"
+                                : slot.reason === "past"
+                                ? "⏰ เลยเวลาแล้ว"
+                                : "🔒 กลุ่มนี้จองแล้ว"}
                             </span>
                           </button>
                         ))}
