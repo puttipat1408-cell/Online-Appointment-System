@@ -1,4 +1,4 @@
-# ระบบจองคิวนัดหมายออนไลน์
+﻿# ระบบจองคิวนัดหมายออนไลน์
 
 แอป Next.js สำหรับจองคิวและติดตามสถานะ ใช้ Supabase เก็บข้อมูล และส่งแจ้งเตือนผ่าน Telegram Bot โดยเลือกห้องแชตตามกลุ่มงานที่รับผิดชอบ
 
@@ -112,10 +112,12 @@ git status
 ตั้งค่าเฉพาะ repository นี้ (แนะนำเมื่อใช้หลายบัญชี):
 
 ```bash
-git config user.name "maxza3001"
-git config user.email "อีเมลที่ยืนยันกับ GitHub หรืออีเมล no-reply"
+git config user.name "puttipat1408-cell
+git config user.email "puttipat1408@gmail.com"
 git config --get user.name
 git config --get user.email
+git config --global user.name "puttipat1408-cell"
+git config --global user.email "puttipat1408@gmail.com"
 ```
 
 ค่า `user.name` และ `user.email` ใช้ระบุผู้เขียน commit และมีผลกับ commit ใหม่เท่านั้น ไม่ได้เปลี่ยนบัญชีที่ใช้ยืนยันตัวตนตอน push หากต้องการตั้งเป็นค่าเริ่มต้นให้ทุก repository ให้เพิ่ม `--global` ในคำสั่ง `git config`
@@ -170,3 +172,5 @@ pnpm lint
 - `pnpm lint` ตรวจรูปแบบและข้อผิดพลาดจาก ESLint
 
 Push ไปยัง branch ที่เชื่อมกับ Vercel แล้ว Vercel จะ deploy ตามการตั้งค่าโปรเจกต์
+#   O n l i n e - A p p o i n t m e n t - S y s t e m  
+ 
