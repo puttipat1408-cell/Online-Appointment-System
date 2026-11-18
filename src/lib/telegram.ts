@@ -110,7 +110,7 @@ export async function sendTelegramBookingNotification(settings: SettingsMap, pay
     `🎫 <b>หมายเลขคิว:</b> ${escapeTelegramHtml(payload.ticketId)}\n` +
     `🏢 <b>ส่วนราชการ:</b> ${escapeTelegramHtml(payload.agency)}\n` +
     `📌 <b>เรื่องที่ขอรับบริการ:</b> ${escapeTelegramHtml(payload.topic)}\n` +
-    `📝 <b>ปัญหา/ข้อหารือ:</b> ${escapeTelegramHtml(payload.consultationDetails)}\n` +
+    (payload.consultationDetails.trim() ? `📝 <b>ปัญหา/ข้อหารือ:</b> ${escapeTelegramHtml(payload.consultationDetails)}\n` : "") +
     `👥 <b>กลุ่มงาน:</b> ${escapeTelegramHtml(payload.department)}\n` +
     `🗓️ <b>วันที่เข้าพบ:</b> ${escapeTelegramHtml(appointmentDate)}\n` +
     `⏰ <b>ช่วงเวลา:</b> ${escapeTelegramHtml(payload.timeSlot)}\n` +

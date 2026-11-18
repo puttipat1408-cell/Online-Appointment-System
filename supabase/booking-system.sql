@@ -45,6 +45,8 @@ create table if not exists public.bookings (
   pending_cancel_chat_id bigint,
   pending_cancel_message_id bigint,
   pending_cancel_at timestamptz,
+  satisfaction_rating smallint check (satisfaction_rating between 1 and 5),
+  satisfaction_feedback text not null default '',
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -57,6 +59,8 @@ alter table public.bookings add column if not exists pending_cancel_message_id b
 alter table public.bookings add column if not exists pending_cancel_at timestamptz;
 alter table public.bookings
   add column if not exists satisfaction_rating smallint check (satisfaction_rating between 1 and 5);
+alter table public.bookings
+  add column if not exists satisfaction_feedback text not null default '';
 
 create unique index if not exists bookings_unique_active_slot
   on public.bookings (appointment_date, department, time_slot)

@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return Response.json({ message: parsed.error.issues[0]?.message ?? "ข้อมูลคะแนนไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const result = await submitBookingRating(parsed.data.ticketId, parsed.data.rating);
+    const result = await submitBookingRating(parsed.data.ticketId, parsed.data.rating, parsed.data.feedback);
     return Response.json(result, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     return createServerErrorResponse(error);

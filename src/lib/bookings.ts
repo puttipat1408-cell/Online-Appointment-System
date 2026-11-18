@@ -98,10 +98,7 @@ export async function createBooking(input: CreateBookingInput, appOrigin: string
   if (topic.allowsOther && !topicOther) {
     throw new AppError("กรุณาระบุรายละเอียดเรื่องที่ขอรับบริการ");
   }
-  const consultationDetails = input.consultationDetails.trim();
-  if (!consultationDetails) {
-    throw new AppError("กรุณาอธิบายปัญหาหรือข้อหารือพอสังเขป");
-  }
+  const consultationDetails = (input.consultationDetails ?? "").trim();
 
   const timeSlot = BOOKING_TIME_SLOTS.find((slot) => slot.id === input.timeSlot);
   if (!timeSlot) {
@@ -480,7 +477,7 @@ async function getBookingRatingStats(topic: string): Promise<BookingRatingStats>
   };
 }
 
-export async function submitBookingRating(ticketId: string, rating: number) {
+export async function submitBookingRating(ticketId: string, rating: number, feedback?: string) {
   const normalizedTicketId = ticketId.trim().toUpperCase();
   if (!/^NID-[A-Z0-9]{6}$/.test(normalizedTicketId)) {
     throw new AppError("รูปแบบหมายเลขคิวไม่ถูกต้อง");
@@ -488,6 +485,7 @@ export async function submitBookingRating(ticketId: string, rating: number) {
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     throw new AppError("กรุณาเลือกคะแนน 1–5 ดาว");
   }
+  const satisfactionFeedback = (feedback ?? "").trim();
 
   const supabase = getSupabaseAdminClient();
   const { data: booking, error: lookupError } = await supabase
@@ -502,15 +500,16 @@ export async function submitBookingRating(ticketId: string, rating: number) {
 
   const { data: updatedBooking, error: updateError } = await supabase
     .from("bookings")
-    .update({ satisfaction_rating: rating })
+    .update({ satisfaction_rating: rating, satisfaction_feedback: satisfactionFeedback })
     .eq("ticket_id", normalizedTicketId)
-    .select("satisfaction_rating")
+    .select("satisfaction_rating, satisfaction_feedback")
     .single();
 
   if (updateError) throw new AppError(`บันทึกคะแนนไม่สำเร็จ: ${updateError.message}`, 500);
 
   return {
     satisfactionRating: updatedBooking.satisfaction_rating as number,
+    satisfactionFeedback: updatedBooking.satisfaction_feedback || "",
     ratingStats: await getBookingRatingStats(booking.topic),
   };
 }
@@ -524,7 +523,7 @@ export async function checkBookingStatus(ticketId: string) {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from("bookings")
-    .select("ticket_id, agency, topic, department, consultation_details, appointment_date, time_slot, status, receiver_name, note, satisfaction_rating")
+    .select("ticket_id, agency, topic, department, consultation_details, appointment_date, time_slot, status, receiver_name, note, satisfaction_rating, satisfaction_feedback")
     .eq("ticket_id", normalizedTicketId)
     .maybeSingle();
 
@@ -547,6 +546,7 @@ export async function checkBookingStatus(ticketId: string) {
     receiverName: data.receiver_name || "รอเจ้าหน้าที่ตอบรับ",
     note: data.note || "",
     satisfactionRating: data.satisfaction_rating as number | null,
+    satisfactionFeedback: data.satisfaction_feedback || "",
     ratingStats,
   };
 }

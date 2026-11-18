@@ -34,6 +34,7 @@ type BookingStatus = {
   receiverName: string;
   note: string;
   satisfactionRating?: number | null;
+  satisfactionFeedback?: string;
   ratingStats?: BookingRatingStats;
 };
 
@@ -172,6 +173,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
   const [statusError, setStatusError] = useState("");
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [ratingValue, setRatingValue] = useState(0);
+  const [ratingFeedback, setRatingFeedback] = useState("");
   const [isSavingRating, setIsSavingRating] = useState(false);
   const [ratingMessage, setRatingMessage] = useState("");
   const [ratingError, setRatingError] = useState("");
@@ -191,6 +193,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
     setStatusError("");
     setStatusResult(null);
     setRatingValue(0);
+    setRatingFeedback("");
     setRatingMessage("");
     setRatingError("");
     try {
@@ -199,6 +202,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
       if (result.found) {
         setStatusResult(result);
         setRatingValue(result.satisfactionRating ?? 0);
+        setRatingFeedback(result.satisfactionFeedback ?? "");
       }
       else setStatusError("ไม่พบหมายเลขคิวนี้ในระบบ กรุณาตรวจสอบรหัสอีกครั้ง");
     } catch (error) {
@@ -221,11 +225,16 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
       const response = await fetch("/api/bookings/rating", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ticketId: statusResult.ticketId, rating: ratingValue }),
+        body: JSON.stringify({ ticketId: statusResult.ticketId, rating: ratingValue, feedback: ratingFeedback }),
       });
-      const result = await readApiResponse<{ satisfactionRating: number; ratingStats: BookingRatingStats }>(response);
+      const result = await readApiResponse<{ satisfactionRating: number; satisfactionFeedback: string; ratingStats: BookingRatingStats }>(response);
       setStatusResult((current) => current
-        ? { ...current, satisfactionRating: result.satisfactionRating, ratingStats: result.ratingStats }
+        ? {
+          ...current,
+          satisfactionRating: result.satisfactionRating,
+          satisfactionFeedback: result.satisfactionFeedback,
+          ratingStats: result.ratingStats,
+        }
         : current);
       setRatingMessage("บันทึกคะแนนเรียบร้อย ขอบคุณสำหรับความคิดเห็น");
     } catch (error) {
@@ -357,10 +366,6 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
     }
     if (selectedTopic.allowsOther && !form.topicOther.trim()) {
       setBookingError("กรุณาระบุรายละเอียดเรื่องที่ขอรับบริการ");
-      return;
-    }
-    if (!form.consultationDetails.trim()) {
-      setBookingError("กรุณาอธิบายปัญหาหรือข้อหารือพอสังเขป");
       return;
     }
     if (!form.timeSlot || !slots.some((slot) => slot.id === form.timeSlot && slot.available)) {
@@ -594,7 +599,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
                           <span className="consultation-card-icon" aria-hidden="true">✎</span>
                           <div>
                             <h4 id="consultationDetailsLabel">อธิบายปัญหา/ข้อหารือพอสังเขป</h4>
-                            <p>รายละเอียดนี้จะส่งให้กลุ่มงานที่รับผิดชอบทาง Telegram</p>
+                            <p>ระบุได้ตามต้องการ ระบบจะส่งข้อความนี้ให้กลุ่มงานที่รับผิดชอบทาง Telegram</p>
                           </div>
                         </div>
                         <textarea
@@ -604,10 +609,9 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
                           onChange={(event) => updateForm("consultationDetails", event.target.value)}
                           placeholder="เช่น ต้องการหารือขั้นตอนการเบิกจ่ายและเอกสารที่ต้องใช้"
                           maxLength={1000}
-                          required
                         />
                         <div className="consultation-card-footer">
-                          <span>กรุณาระบุข้อมูลโดยสรุป เพื่อให้เจ้าหน้าที่เตรียมตอบข้อหารือได้</span>
+                          <span>หากมีรายละเอียด เจ้าหน้าที่จะใช้ข้อมูลนี้เพื่อเตรียมตอบข้อหารือ</span>
                           <span>{form.consultationDetails.length}/1,000</span>
                         </div>
                       </section>
@@ -755,6 +759,22 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
                           ★
                         </button>
                       ))}
+                    </div>
+                    <div className="satisfaction-comment">
+                      <label htmlFor="ratingFeedback">ข้อเสนอแนะเพิ่มเติม <span>(ไม่บังคับ)</span></label>
+                      <textarea
+                        id="ratingFeedback"
+                        className="input"
+                        value={ratingFeedback}
+                        onChange={(event) => {
+                          setRatingFeedback(event.target.value);
+                          setRatingError("");
+                          setRatingMessage("");
+                        }}
+                        placeholder="เขียนข้อเสนอแนะเพื่อช่วยพัฒนาการให้บริการ"
+                        maxLength={1000}
+                      />
+                      <span className="satisfaction-comment-count">{ratingFeedback.length}/1,000</span>
                     </div>
                     <div className="satisfaction-actions">
                       <span>{ratingValue ? `เลือก ${ratingValue} จาก 5 ดาว` : "แตะดาวเพื่อให้คะแนน"}</span>

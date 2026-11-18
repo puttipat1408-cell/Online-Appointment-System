@@ -11,7 +11,7 @@ export const createBookingSchema = z.object({
   agency: z.string().trim().min(1, "กรุณาระบุชื่อส่วนราชการผู้รับบริการ").max(200),
   topicId: z.string().trim().min(1, "กรุณาเลือกเรื่องที่ขอรับบริการ"),
   topicOther: z.string().trim().max(300).optional(),
-  consultationDetails: z.string().trim().min(1, "กรุณาอธิบายปัญหาหรือข้อหารือพอสังเขป").max(1000, "รายละเอียดต้องไม่เกิน 1,000 ตัวอักษร"),
+  consultationDetails: z.string().trim().max(1000, "รายละเอียดต้องไม่เกิน 1,000 ตัวอักษร").optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "รูปแบบวันที่ไม่ถูกต้อง"),
   timeSlot: z.string().trim().min(1, "กรุณาเลือกช่วงเวลา"),
 });
@@ -19,6 +19,7 @@ export const createBookingSchema = z.object({
 export const bookingRatingSchema = z.object({
   ticketId: z.string().trim().regex(/^NID-[A-Z0-9]{6}$/i, "รูปแบบหมายเลขคิวไม่ถูกต้อง"),
   rating: z.number().int().min(1, "กรุณาเลือกคะแนน 1–5 ดาว").max(5, "คะแนนสูงสุดคือ 5 ดาว"),
+  feedback: z.string().trim().max(1000, "ข้อเสนอแนะต้องไม่เกิน 1,000 ตัวอักษร").optional(),
 });
 
 export const updateRequestStatusSchema = z.object({

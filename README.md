@@ -145,11 +145,11 @@ git remote -v
 
 ```bash
 git add .
-git status
-git diff --cached
-git commit -m "เพิ่มคำอธิบาย"
+git commit -m "เพิ่มข้อเสนอแนะ"
 git push
 ```
+git status
+git diff --cached
 
 หากเป็นการ push branch นี้ครั้งแรก:
 

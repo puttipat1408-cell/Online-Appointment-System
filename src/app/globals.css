@@ -1349,6 +1349,35 @@ select:focus-visible {
   color: #e3a626;
 }
 
+.satisfaction-comment {
+  display: grid;
+  gap: 7px;
+  margin: 14px 0;
+}
+
+.satisfaction-comment label {
+  color: #344e5d;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.satisfaction-comment label span,
+.satisfaction-comment-count {
+  color: var(--ink-faint);
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+
+.satisfaction-comment .input {
+  min-height: 92px;
+  padding: 11px 13px;
+  resize: vertical;
+}
+
+.satisfaction-comment-count {
+  justify-self: end;
+}
+
 .satisfaction-actions,
 .satisfaction-summary {
   display: flex;
