@@ -11,6 +11,7 @@ export const createBookingSchema = z.object({
   agency: z.string().trim().min(1, "กรุณาระบุชื่อส่วนราชการผู้รับบริการ").max(200),
   topicId: z.string().trim().min(1, "กรุณาเลือกเรื่องที่ขอรับบริการ"),
   topicOther: z.string().trim().max(300).optional(),
+  consultationDetails: z.string().trim().min(1, "กรุณาอธิบายปัญหาหรือข้อหารือพอสังเขป").max(1000, "รายละเอียดต้องไม่เกิน 1,000 ตัวอักษร"),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "รูปแบบวันที่ไม่ถูกต้อง"),
   timeSlot: z.string().trim().min(1, "กรุณาเลือกช่วงเวลา"),
 });

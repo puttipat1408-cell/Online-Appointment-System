@@ -7,7 +7,7 @@ import {
   getTelegramActionConfig,
 } from "@/lib/settings";
 import type { SettingsMap, TelegramAction, TelegramRequestNotificationPayload } from "@/lib/types";
-import { BOOKING_TOPIC_GROUPS } from "@/lib/booking-options";
+import { getBookingDepartmentIndex } from "@/lib/booking-options";
 import { escapeTelegramHtml } from "@/lib/utils";
 
 type TelegramApiResult = {
@@ -82,6 +82,7 @@ export async function sendTelegramBookingNotification(settings: SettingsMap, pay
   agency: string;
   topic: string;
   department: string;
+  consultationDetails: string;
   date: string;
   timeSlot: string;
 }, appOrigin: string) {
@@ -92,7 +93,7 @@ export async function sendTelegramBookingNotification(settings: SettingsMap, pay
     "TELEGRAM_CHAT_ID_BOOKING_GF",
     "TELEGRAM_CHAT_ID_BOOKING_POLICY",
   ];
-  const groupIndex = BOOKING_TOPIC_GROUPS.findIndex((group) => group.department === payload.department);
+  const groupIndex = getBookingDepartmentIndex(payload.department);
   const groupChatId = groupIndex >= 0 ? settings[chatSettingKeys[groupIndex]]?.trim() : "";
   const chatId = groupChatId || settings.TELEGRAM_CHAT_ID?.trim() || process.env.TELEGRAM_CHAT_ID?.trim();
   if (!token || !chatId) return { configured: false, sent: false };
@@ -109,6 +110,7 @@ export async function sendTelegramBookingNotification(settings: SettingsMap, pay
     `🎫 <b>หมายเลขคิว:</b> ${escapeTelegramHtml(payload.ticketId)}\n` +
     `🏢 <b>ส่วนราชการ:</b> ${escapeTelegramHtml(payload.agency)}\n` +
     `📌 <b>เรื่องที่ขอรับบริการ:</b> ${escapeTelegramHtml(payload.topic)}\n` +
+    `📝 <b>ปัญหา/ข้อหารือ:</b> ${escapeTelegramHtml(payload.consultationDetails)}\n` +
     `👥 <b>กลุ่มงาน:</b> ${escapeTelegramHtml(payload.department)}\n` +
     `🗓️ <b>วันที่เข้าพบ:</b> ${escapeTelegramHtml(appointmentDate)}\n` +
     `⏰ <b>ช่วงเวลา:</b> ${escapeTelegramHtml(payload.timeSlot)}\n` +

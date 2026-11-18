@@ -10,7 +10,7 @@ insert into public.app_settings (key, value, description) values
   ('TELEGRAM_CHAT_ID_BOOKING_ADMIN', '', 'Telegram chat ID for ฝ่ายบริหารทั่วไป bookings'),
   ('TELEGRAM_CHAT_ID_BOOKING_ACADEMIC', '', 'Telegram chat ID for กลุ่มงานวิชาการ bookings'),
   ('TELEGRAM_CHAT_ID_BOOKING_GF', '', 'Telegram chat ID for กลุ่มงานระบบการคลัง GF bookings'),
-  ('TELEGRAM_CHAT_ID_BOOKING_POLICY', '', 'Telegram chat ID for กลุ่มนโยบายเศรษฐกิจการคลัง bookings'),
+  ('TELEGRAM_CHAT_ID_BOOKING_POLICY', '', 'Telegram chat ID for กลุ่มงานนโยบายและเศรษฐกิจการคลัง bookings'),
   ('APP_TITLE', 'ระบบนัดหมายออนไลน์', 'ชื่อระบบนัดหมายออนไลน์'),
   ('TELEGRAM_BOT_TOKEN', '', 'Token จาก BotFather'),
   ('TELEGRAM_CHAT_ID', '', 'Chat ID สำรองเมื่อยังไม่ได้กำหนดห้องของกลุ่มงาน'),
@@ -37,6 +37,7 @@ create table if not exists public.bookings (
   agency text not null,
   topic text not null,
   department text not null,
+  consultation_details text not null default '',
   receiver_name text not null default '',
   note text not null default '',
   status text not null default 'รอตอบรับ',
@@ -49,6 +50,7 @@ create table if not exists public.bookings (
 );
 
 alter table public.bookings add column if not exists note text not null default '';
+alter table public.bookings add column if not exists consultation_details text not null default '';
 alter table public.bookings add column if not exists pending_cancel_user_id bigint;
 alter table public.bookings add column if not exists pending_cancel_chat_id bigint;
 alter table public.bookings add column if not exists pending_cancel_message_id bigint;

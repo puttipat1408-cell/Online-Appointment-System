@@ -7,7 +7,7 @@ const DEFAULT_SETTINGS_ROWS = [
   { key: "TELEGRAM_CHAT_ID_BOOKING_ADMIN", value: "", description: "Telegram chat ID for ฝ่ายบริหารทั่วไป bookings" },
   { key: "TELEGRAM_CHAT_ID_BOOKING_ACADEMIC", value: "", description: "Telegram chat ID for กลุ่มงานวิชาการ bookings" },
   { key: "TELEGRAM_CHAT_ID_BOOKING_GF", value: "", description: "Telegram chat ID for กลุ่มงานระบบการคลัง GF bookings" },
-  { key: "TELEGRAM_CHAT_ID_BOOKING_POLICY", value: "", description: "Telegram chat ID for กลุ่มนโยบายเศรษฐกิจการคลัง bookings" },
+  { key: "TELEGRAM_CHAT_ID_BOOKING_POLICY", value: "", description: "Telegram chat ID for กลุ่มงานนโยบายและเศรษฐกิจการคลัง bookings" },
   { key: "APP_TITLE", value: "ระบบนัดหมายออนไลน์", description: "ชื่อระบบนัดหมายออนไลน์" },
   { key: "TELEGRAM_BOT_TOKEN", value: "", description: "Token จาก BotFather" },
   { key: "TELEGRAM_CHAT_ID", value: "", description: "Chat ID สำรองเมื่อยังไม่ได้กำหนดห้องของกลุ่มงาน" },

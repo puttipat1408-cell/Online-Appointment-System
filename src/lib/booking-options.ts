@@ -38,26 +38,23 @@ export const BOOKING_TOPIC_GROUPS = [
     topics: [
       { id: "gf-new-gfmis-thai", label: "ระบบ New GFMIS Thai" },
       { id: "gf-budget-disbursement-acceleration", label: "งานด้านเร่งรัดการเบิกจ่ายงบประมาณ" },
-      {
-        id: "gf-gfmis-ktb-vendor",
-        label: "New GFMIS Thai/KTB Corporate Online/ข้อมูลหลักผู้ขาย",
-      },
-      { id: "gf-token", label: "ต่ออายุ Token key/Soft Token" },
+      { id: "gf-ktb-corporate-online", label: "KTB Corporate Online" },
+      { id: "gf-vendor-master-data", label: "ข้อมูลหลักผู้ขาย" },
+      { id: "gf-government-accounting", label: "การบัญชีภาครัฐ" },
+      { id: "gf-soft-token", label: "Soft Token" },
       { id: "gf-other", label: "อื่นๆ", allowsOther: true },
     ],
   },
   {
-    department: "กลุ่มนโยบายเศรษฐกิจการคลัง",
+    department: "กลุ่มงานนโยบายและเศรษฐกิจการคลัง",
     topics: [
-      { id: "policy-economy", label: "งานด้านเศรษฐกิจ" },
-      { id: "policy-government-policy", label: "งานนโยบายภาครัฐ" },
+      { id: "policy-economic-data", label: "งานด้านข้อมูลเศรษฐกิจการคลัง" },
+      {
+        id: "policy-government-policy",
+        label: "นโยบายภาครัฐ เช่น เบี้ยเลี้ยงชีพผู้สูงอายุ บัตรสวัสดิการแห่งรัฐ ฯลฯ เป็นต้น",
+      },
       { id: "policy-regional-lottery", label: "งานตัวแทนจำหน่ายสลากในส่วนภูมิภาค" },
       { id: "policy-nsf", label: "กองทุนการออมแห่งชาติ (กอช.)" },
-      { id: "policy-economic-data", label: "ข้อมูลเศรษฐกิจการคลัง" },
-      {
-        id: "policy-state-benefits",
-        label: "นโยบายของรัฐ เช่น เบี้ยยังชีพผู้สูงอายุ บัตรสวัสดิการแห่งรัฐ ฯลฯ เป็นต้น",
-      },
       { id: "policy-complaint", label: "ร้องทุกข์/ร้องเรียน" },
       { id: "policy-other", label: "อื่นๆ", allowsOther: true },
     ],
@@ -79,6 +76,15 @@ export const BOOKING_TOPICS: BookingTopicOption[] = BOOKING_TOPIC_GROUPS.flatMap
     allowsOther: "allowsOther" in topic && topic.allowsOther,
   })),
 );
+
+export function getBookingDepartmentIndex(department: string) {
+  const currentIndex = BOOKING_TOPIC_GROUPS.findIndex((group) => group.department === department);
+  if (currentIndex >= 0) return currentIndex;
+
+  // Keep existing appointments assigned to the former policy group routable.
+  if (department === "กลุ่มนโยบายเศรษฐกิจการคลัง") return 3;
+  return -1;
+}
 
 export const BOOKING_TIME_SLOTS = [
   // ช่วงเช้า

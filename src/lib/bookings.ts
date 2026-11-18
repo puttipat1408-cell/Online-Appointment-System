@@ -6,7 +6,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { getSettingsMap } from "@/lib/settings";
 import { syncBookingReportRow } from "@/lib/google-sheets";
 import { sendTelegramBookingNotification } from "@/lib/telegram";
-import { BOOKING_TIME_SLOTS, BOOKING_TOPIC_GROUPS, getBookingTopic } from "@/lib/booking-options";
+import { BOOKING_TIME_SLOTS, getBookingDepartmentIndex, getBookingTopic } from "@/lib/booking-options";
 import type { CreateBookingInput } from "@/lib/types";
 import { AppError, formatBangkokDay, getBangkokDateParts } from "@/lib/utils";
 
@@ -98,6 +98,10 @@ export async function createBooking(input: CreateBookingInput, appOrigin: string
   if (topic.allowsOther && !topicOther) {
     throw new AppError("กรุณาระบุรายละเอียดเรื่องที่ขอรับบริการ");
   }
+  const consultationDetails = input.consultationDetails.trim();
+  if (!consultationDetails) {
+    throw new AppError("กรุณาอธิบายปัญหาหรือข้อหารือพอสังเขป");
+  }
 
   const timeSlot = BOOKING_TIME_SLOTS.find((slot) => slot.id === input.timeSlot);
   if (!timeSlot) {
@@ -132,6 +136,7 @@ export async function createBooking(input: CreateBookingInput, appOrigin: string
       agency,
       topic: topicText,
       department: topic.department,
+      consultation_details: consultationDetails,
       receiver_name: "",
       status: "รอตอบรับ",
     });
@@ -156,6 +161,7 @@ export async function createBooking(input: CreateBookingInput, appOrigin: string
           agency,
           topic: topicText,
           department: topic.department,
+          consultationDetails,
           date: input.date,
           timeSlot: timeSlot.label,
         }, appOrigin);
@@ -175,6 +181,7 @@ export async function createBooking(input: CreateBookingInput, appOrigin: string
           agency,
           topic: topicText,
           department: topic.department,
+          consultationDetails,
           date: input.date,
           timeSlot: timeSlot.id,
           status: "รอตอบรับ",
@@ -258,7 +265,7 @@ async function getTelegramBooking(settings: Record<string, string>, ticketId: st
   if (lookupError) throw new AppError(`ค้นหาคิวไม่สำเร็จ: ${lookupError.message}`, 500);
   if (!booking) throw new AppError("ไม่พบหมายเลขคิวนี้", 404);
 
-  const groupIndex = BOOKING_TOPIC_GROUPS.findIndex((group) => group.department === booking.department);
+  const groupIndex = getBookingDepartmentIndex(booking.department);
   const groupChatKeys = [
     "TELEGRAM_CHAT_ID_BOOKING_ADMIN",
     "TELEGRAM_CHAT_ID_BOOKING_ACADEMIC",
@@ -517,7 +524,7 @@ export async function checkBookingStatus(ticketId: string) {
   const supabase = getSupabaseAdminClient();
   const { data, error } = await supabase
     .from("bookings")
-    .select("ticket_id, agency, topic, department, appointment_date, time_slot, status, receiver_name, note, satisfaction_rating")
+    .select("ticket_id, agency, topic, department, consultation_details, appointment_date, time_slot, status, receiver_name, note, satisfaction_rating")
     .eq("ticket_id", normalizedTicketId)
     .maybeSingle();
 
@@ -533,6 +540,7 @@ export async function checkBookingStatus(ticketId: string) {
     agency: data.agency,
     topic: data.topic,
     department: data.department,
+    consultationDetails: data.consultation_details || "",
     date: data.appointment_date,
     timeSlot: data.time_slot,
     status: data.status || "รอตอบรับ",

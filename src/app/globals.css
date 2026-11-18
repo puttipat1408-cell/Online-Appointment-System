@@ -691,6 +691,59 @@ select:focus-visible {
   margin-top: 10px;
 }
 
+.consultation-card {
+  gap: 14px;
+  padding: 17px;
+  border: 1px solid var(--brand-border);
+  border-radius: 14px;
+  background: var(--brand-tint);
+}
+
+.consultation-card-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.consultation-card-icon {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  flex: 0 0 29px;
+  place-items: center;
+  border-radius: 9px;
+  color: #fff;
+  background: var(--brand);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.consultation-card h4 {
+  color: var(--brand-deep);
+  font-size: 0.91rem;
+  font-weight: 700;
+}
+
+.consultation-card-heading p,
+.consultation-card-footer {
+  color: var(--ink-soft);
+  font-size: 0.77rem;
+  line-height: 1.5;
+}
+
+.consultation-textarea {
+  min-height: 108px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.consultation-card-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .readonly-input {
   color: var(--brand-deep);
   background: var(--brand-tint);

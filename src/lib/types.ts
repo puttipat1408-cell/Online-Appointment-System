@@ -32,6 +32,7 @@ export interface CreateBookingInput {
   agency: string;
   topicId: string;
   topicOther?: string;
+  consultationDetails: string;
   date: string;
   timeSlot: string;
 }

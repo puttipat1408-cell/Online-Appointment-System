@@ -10,6 +10,7 @@ type BookingForm = {
   agency: string;
   topicId: string;
   topicOther: string;
+  consultationDetails: string;
   date: string;
   timeSlot: string;
 };
@@ -26,6 +27,7 @@ type BookingStatus = {
   agency: string;
   topic: string;
   department: string;
+  consultationDetails: string;
   date: string;
   timeSlot: string;
   status: string;
@@ -154,6 +156,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
     agency: "",
     topicId: "",
     topicOther: "",
+    consultationDetails: "",
     date: getBangkokToday(),
     timeSlot: "",
   }));
@@ -356,6 +359,10 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
       setBookingError("กรุณาระบุรายละเอียดเรื่องที่ขอรับบริการ");
       return;
     }
+    if (!form.consultationDetails.trim()) {
+      setBookingError("กรุณาอธิบายปัญหาหรือข้อหารือพอสังเขป");
+      return;
+    }
     if (!form.timeSlot || !slots.some((slot) => slot.id === form.timeSlot && slot.available)) {
       setBookingError("กรุณาเลือกช่วงเวลาที่ยังว่าง");
       return;
@@ -370,6 +377,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
           agency: form.agency,
           topicId: form.topicId,
           topicOther: form.topicOther,
+          consultationDetails: form.consultationDetails,
           date: form.date,
           timeSlot: form.timeSlot,
         }),
@@ -380,6 +388,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
         agency: "",
         topicId: "",
         topicOther: "",
+        consultationDetails: "",
         date: getBangkokToday(),
         timeSlot: "",
       });
@@ -579,6 +588,30 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
                         readOnly
                       />
                     </div>
+                    {selectedTopic ? (
+                      <section className="consultation-card field full" aria-labelledby="consultationDetailsLabel">
+                        <div className="consultation-card-heading">
+                          <span className="consultation-card-icon" aria-hidden="true">✎</span>
+                          <div>
+                            <h4 id="consultationDetailsLabel">อธิบายปัญหา/ข้อหารือพอสังเขป</h4>
+                            <p>รายละเอียดนี้จะส่งให้กลุ่มงานที่รับผิดชอบทาง Telegram</p>
+                          </div>
+                        </div>
+                        <textarea
+                          id="consultationDetails"
+                          className="input consultation-textarea"
+                          value={form.consultationDetails}
+                          onChange={(event) => updateForm("consultationDetails", event.target.value)}
+                          placeholder="เช่น ต้องการหารือขั้นตอนการเบิกจ่ายและเอกสารที่ต้องใช้"
+                          maxLength={1000}
+                          required
+                        />
+                        <div className="consultation-card-footer">
+                          <span>กรุณาระบุข้อมูลโดยสรุป เพื่อให้เจ้าหน้าที่เตรียมตอบข้อหารือได้</span>
+                          <span>{form.consultationDetails.length}/1,000</span>
+                        </div>
+                      </section>
+                    ) : null}
                   </div>
                 </div>
 
@@ -641,7 +674,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
                     className="button-secondary"
                     disabled={isSubmitting}
                     onClick={() => {
-                      setForm({ agency: "", topicId: "", topicOther: "", date: getBangkokToday(), timeSlot: "" });
+                      setForm({ agency: "", topicId: "", topicOther: "", consultationDetails: "", date: getBangkokToday(), timeSlot: "" });
                       setBookingError("");
                     }}
                   >ล้างข้อมูล</button>
@@ -691,6 +724,7 @@ export function RequestConsole({ agencies }: { agencies: readonly string[] }) {
                   <div><span>เจ้าหน้าที่ผู้รับเรื่อง</span><strong>{statusResult.receiverName}</strong></div>
                   <div><span>หน่วยงานผู้รับบริการ</span><strong>{statusResult.agency}</strong></div>
                   <div><span>เรื่องที่นัดหมาย</span><strong>{statusResult.topic}</strong></div>
+                  {statusResult.consultationDetails ? <div><span>ปัญหา/ข้อหารือ</span><strong>{statusResult.consultationDetails}</strong></div> : null}
                   <div><span>กลุ่มงาน</span><strong>{statusResult.department}</strong></div>
                   <div><span>วันที่เข้าพบ</span><strong>{formatThaiDate(statusResult.date)}</strong></div>
                   <div><span>ช่วงเวลา</span><strong>{statusResult.timeSlot}</strong></div>
